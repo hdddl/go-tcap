@@ -53,6 +53,31 @@ func NewContinueInvoke(otid, dtid uint32, invID, opCode int, payload []byte) *TC
 	return t
 }
 
+func NewContinueInvokeWithDialogue(otid, dtid uint32, invID, opCode int, dlgType, ctx, ctxver uint8, payload []byte) *TCAP {
+	t := &TCAP{
+		Transaction: NewContinue(otid, dtid, []byte{}),
+		Components:  NewComponents(NewInvoke(invID, -1, opCode, true, payload)),
+	}
+	t.Dialogue = NewDialogue(dlgType, 1, NewAARE(1, ctx, ctxver, 0, 1, 0), []byte{})
+
+	t.SetLength()
+
+	return t
+}
+
+// NewEndInvokeWithDialogue create a new TCAP of type Transaction=End, Component=Invoke
+func NewEndInvokeWithDialogue(dtid uint32, invID, opCode int, dlgType, ctx, ctxver uint8, payload []byte) *TCAP {
+	t := &TCAP{
+		Transaction: NewEnd(dtid, []byte{}),
+		Components:  NewComponents(NewInvoke(invID, -1, opCode, true, payload)),
+	}
+	t.Dialogue = NewDialogue(dlgType, 1, NewAARE(1, ctx, ctxver, 0, 1, 0), []byte{})
+
+	t.SetLength()
+
+	return t
+}
+
 // NewEndReturnResult creates a new TCAP of type Transaction=End, Component=ReturnResult.
 func NewEndReturnResult(dtid uint32, invID, opCode int, isLast bool, payload []byte) *TCAP {
 	t := &TCAP{
@@ -61,6 +86,23 @@ func NewEndReturnResult(dtid uint32, invID, opCode int, isLast bool, payload []b
 	}
 	t.SetLength()
 
+	return t
+}
+
+func NewEndReturnError(dtid uint32, invId, errCode int, isLocal bool, param []byte) *TCAP {
+	t := &TCAP{
+		Transaction: NewEnd(dtid, []byte{}),
+		Components:  NewComponents(NewReturnError(invId, errCode, isLocal, param)),
+	}
+	t.SetLength()
+
+	return t
+}
+
+func NewEndReturnErrorWithDialogue(dtid uint32, dlgType, ctx, ctxver uint8, invId, errCode int, isLocal bool, param []byte) *TCAP {
+	t := NewEndReturnError(dtid, invId, errCode, isLocal, param)
+	t.Dialogue = NewDialogue(dlgType, 1, NewAARE(1, ctx, ctxver, Accepted, DialogueServiceUser, Null), []byte{})
+	t.SetLength()
 	return t
 }
 

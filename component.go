@@ -118,7 +118,7 @@ func NewInvoke(invID, lkID, opCode int, isLocal bool, param []byte) *Component {
 	}
 
 	if param != nil {
-		if err := c.setParameterFromBytes(param); err != nil {
+		if err := c.setParameterFromBytesWithTag(param); err != nil {
 			logf("failed to build Parameter: %v", err)
 		}
 	}
@@ -148,7 +148,7 @@ func NewReturnResult(invID, opCode int, isLocal, isLast bool, param []byte) *Com
 	}
 
 	if param != nil {
-		if err := c.setParameterFromBytes(param); err != nil {
+		if err := c.setParameterFromBytesWithTag(param); err != nil {
 			logf("failed to build Parameter: %v", err)
 		}
 	}
@@ -176,6 +176,7 @@ func NewReturnError(invID, errCode int, isLocal bool, param []byte) *Component {
 	}
 
 	c.SetLength()
+
 	return c
 }
 
@@ -400,11 +401,11 @@ func (c *Component) UnmarshalBinary(b []byte) error {
 	switch c.Type.Code() {
 	case Invoke:
 		/* TODO: Implement LinkedID Parser.
-		c.LinkedID, err = ParseIE(b[offset:])
-		if err != nil {
-			return err
-		}
-		offset += c.LinkedID.MarshalLen()
+		   c.LinkedID, err = ParseIE(b[offset:])
+		   if err != nil {
+		       return err
+		   }
+		   offset += c.LinkedID.MarshalLen()
 		*/
 		c.OperationCode, err = ParseIE(b[offset:])
 		if err != nil {
@@ -470,6 +471,7 @@ func (c *Component) setParameterFromBytes(b []byte) error {
 	if b == nil {
 		return io.ErrUnexpectedEOF
 	}
+
 	ies, err := ParseMultiIEs(b)
 	if err != nil {
 		logf("failed to parse given bytes, building it anyway: %v", err)
@@ -485,6 +487,35 @@ func (c *Component) setParameterFromBytes(b []byte) error {
 	c.Parameter = &IE{
 		// TODO: tag should not be determined here.
 		Tag:   NewUniversalConstructorTag(0x10),
+		Value: b,
+		IE:    ies,
+	}
+	return nil
+}
+
+// the first byte should be tag
+func (c *Component) setParameterFromBytesWithTag(b []byte) error {
+	if b == nil || len(b) < 2 {
+		return io.ErrUnexpectedEOF
+	}
+
+	tag := Tag(b[0])
+	b = b[2:]
+
+	ies, err := ParseMultiIEs(b)
+	if err != nil {
+		logf("failed to parse given bytes, building it anyway: %v", err)
+		c.Parameter = &IE{
+			// TODO: tag should not be determined here.
+			Tag:   tag,
+			Value: b,
+		}
+
+		return nil
+	}
+
+	c.Parameter = &IE{
+		Tag:   tag,
 		Value: b,
 		IE:    ies,
 	}

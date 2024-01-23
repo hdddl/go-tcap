@@ -137,6 +137,17 @@ func NewAbort(dtid uint32, cause uint8, payload []byte) *Transaction {
 	return t
 }
 
+// NewContinueReturnResult creates a new TCAP of type Transaction=Continue, Component=ReturnResult.
+func NewContinueReturnResult(otid, dtid uint32, invID, opCode int, payload []byte) *TCAP {
+	t := &TCAP{
+		Transaction: NewContinue(otid, dtid, []byte{}),
+		Components:  NewComponents(NewReturnResult(invID, opCode, true, true, payload)),
+	}
+	t.SetLength()
+
+	return t
+}
+
 // MarshalBinary returns the byte sequence generated from a Transaction instance.
 func (t *Transaction) MarshalBinary() ([]byte, error) {
 	b := make([]byte, t.MarshalLen())
