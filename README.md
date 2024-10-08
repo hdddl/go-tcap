@@ -3,8 +3,8 @@
 Simple TCAP implementation in Golang
 
 [![CircleCI](https://circleci.com/gh/wmnsk/go-tcap.svg?style=shield)](https://circleci.com/gh/wmnsk/go-tcap)
-[![GoDoc](https://godoc.org/github.com/wmnsk/go-tcap?status.svg)](https://godoc.org/github.com/wmnsk/go-tcap)
-[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/wmnsk/go-tcap/blob/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/hdddl/go-tcap?status.svg)](https://godoc.org/github.com/hdddl/go-tcap)
+[![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/hdddl/go-tcap/blob/master/LICENSE)
 
 Package tcap provides simple and painless handling of TCAP(Transaction Capabilities Application Part) in SS7/SIGTRAN protocol stack, implemented in the Go Programming Language.
 
@@ -145,4 +145,4 @@ I'm always open to welcome co-authors! Please feel free to talk to me.
 
 ## LICENSE
 
-[MIT](https://github.com/wmnsk/go-tcap/blob/master/LICENSE)
+[MIT](https://github.com/hdddl/go-tcap/blob/master/LICENSE)

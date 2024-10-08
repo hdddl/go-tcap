@@ -18,7 +18,7 @@ import (
 	"github.com/wmnsk/go-sccp"
 	"github.com/wmnsk/go-sccp/params"
 	"github.com/wmnsk/go-sccp/utils"
-	"github.com/wmnsk/go-tcap"
+	"github.com/hdddl/go-tcap"
 )
 
 func parsePC(s *string) uint32 {
