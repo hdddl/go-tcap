@@ -181,7 +181,7 @@ func ParseAsBer(b []byte) ([]*IE, error) {
 func ParseAsBER(b []byte) ([]*IE, error) {
 	var ies []*IE
 	for {
-		if len(b) == 0 {
+		if len(b) < 2 {
 			break
 		}
 
@@ -224,13 +224,24 @@ func (i *IE) ParseRecursive(b []byte) error {
 	if l < 2 {
 		return io.ErrUnexpectedEOF
 	}
-
 	i.Tag = Tag(b[0])
-	i.Length = b[1]
+	if b[1]&0x80 == 0x80 {
+		lenBytes := int(b[1] & 0x7F)
+		for k := lenBytes; k >= 1; k-- {
+			if 1+k >= l {
+				continue
+			}
+			i.Length += (b[1+k] << (8 * (lenBytes - k)))
+		}
+		i.Value = b[2+lenBytes : 2+lenBytes+int(i.Length)]
+	} else {
+		i.Length = b[1]
+		i.Value = b[2 : 2+int(i.Length)]
+	}
+
 	if int(i.Length)+2 > len(b) {
 		return nil
 	}
-	i.Value = b[2 : 2+int(i.Length)]
 
 	if i.Tag.Form() == 1 {
 		x, err := ParseAsBER(i.Value)
@@ -245,7 +256,11 @@ func (i *IE) ParseRecursive(b []byte) error {
 
 // MarshalLen returns the serial length of IE.
 func (i *IE) MarshalLen() int {
-	return 2 + len(i.Value)
+	if len(i.Value) > 127 {
+		return 3 + len(i.Value)
+	} else {
+		return 2 + len(i.Value)
+	}
 }
 
 // SetLength sets the length in Length field.
